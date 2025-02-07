@@ -69,7 +69,3 @@ We dedicate this capstone research project to:
 Lastly, this project is dedicated to our **families**, who are the driving force behind our hard work and perseverance.
 
 ---
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
