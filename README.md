@@ -44,28 +44,3 @@ The system proves effective in enhancing experiential learning and preparing stu
 Hotel Management, Practical Training, Hospitality Education, Experimental Learning
 
 ---
-
-## Acknowledgements
-
-We would like to express our deepest gratitude to the following individuals for their contributions and support:
-
-- **Almighty God** for His blessings and guidance throughout our college journey.
-- **Professor Belyn R. Enguerra**, for referring us to the project and giving us the opportunity to contribute to the university’s mission and vision.
-- **Professor Rodel R. Marquez,** our supportive adviser, for his dedication and guidance.
-- **Dr. Minah P. Quiñal,** for her continued support and for being a wonderful chairperson.
-- **Professor Aldeliene K. Tulawie and Dr. Socorro S. Lozada,** for providing valuable comments and suggestions during our defense.
-- **Ms. Fatima Onrubia,** our mentor, for her tireless guidance and advice in improving our system.
-- To our **families**, for their financial and emotional support during this journey.
-
----
-
-## Dedication
-
-We dedicate this capstone research project to:
-- The **School of Business Administration** of Zamboanga Peninsula Polytechnic State University
-- Our **university** and the **College of Information and Computing Science**
-- Our **panelists** and **research adviser**
-
-Lastly, this project is dedicated to our **families**, who are the driving force behind our hard work and perseverance.
-
----
