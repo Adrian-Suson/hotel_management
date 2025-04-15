@@ -7,8 +7,6 @@ import {
   Typography,
   TextField,
   Button,
-  AppBar,
-  Toolbar,
   Grid,
   Card,
   CardContent,
@@ -162,7 +160,7 @@ const LoginPage = ({ setUserRole }) => {
   };
 
   const sliderSettings = {
-    dots: true,
+    dots: false,
     infinite: true,
     speed: 700,
     slidesToShow: 1,
@@ -195,9 +193,9 @@ const LoginPage = ({ setUserRole }) => {
       sx={{
         display: "flex",
         alignItems: "center",
-        position: "absolute",
-        top: "16px",
-        left: "16px",
+        justifyContent: "center",
+        height: "100%",
+        width: "100%",
       }}
     >
       <img
@@ -256,24 +254,8 @@ const LoginPage = ({ setUserRole }) => {
         }}
       />
 
-      {/* Header AppBar */}
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          backdropFilter: "blur(8px)",
-        }}
-      >
-        <Container maxWidth="lg">
-          <Toolbar >
-            {renderLogo()}
-          </Toolbar>
-        </Container>
-      </AppBar>
-
       <Container maxWidth="xl" sx={{ flexGrow: 1, display: "flex", alignItems: "center" }}>
-        <Grid container spacing={3} sx={{ mt: 8, mb: 4 }}>
+        <Grid container spacing={3} sx={{ mt: 4, mb: 4 }}>
           {/* Advertisement Slider */}
           <Grid
             item
@@ -368,6 +350,11 @@ const LoginPage = ({ setUserRole }) => {
               >
                 <CardContent sx={{ p: { xs: 3, md: 4 } }}>
                   <Collapse in={isFormOpen}>
+                    {/* Add Logo at the top of the form */}
+                    <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+                      {renderLogo()}
+                    </Box>
+
                     <Box
                       sx={{
                         display: "flex",

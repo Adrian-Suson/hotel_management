@@ -11,12 +11,10 @@ import {
   Typography,
   useTheme,
   Avatar,
-  Divider,
   Tooltip,
 } from "@mui/material";
 import {
   ChevronLeft,
-  ChevronRightOutlined,
   HomeOutlined,
   PeopleAltOutlined,
   ExpandLess,
@@ -105,8 +103,6 @@ const Sidebar = ({
   useEffect(() => {
     if (userId) {
       fetchUser();
-    }
-    if (userId) {
       fetchProfile();
     }
   }, [userId, fetchUser, fetchProfile]);
@@ -142,37 +138,42 @@ const Sidebar = ({
     const path = `${userRole}/${lcText}`;
     return (
       <ListItem key={text} disablePadding>
-        <ListItemButton
-          onClick={() =>
-            handleNavigation(`/${path}`, `Navigated to ${text}`, text)
-          }
-          sx={{
-            backgroundColor:
-              active === path ? theme.palette.primary.light : "transparent",
-            color:
-              active === path
-                ? theme.palette.primary.contrastText
-                : theme.palette.text.primary,
-            "&:hover": {
-              backgroundColor: theme.palette.primary.light,
-              color: theme.palette.primary.contrastText,
-            },
-            px: isMinimized ? 2 : 4,
-          }}
-        >
-          <ListItemIcon
+        <Tooltip title={isMinimized ? text : ""} placement="right">
+          <ListItemButton
+            onClick={() =>
+              handleNavigation(`/${path}`, `Navigated to ${text}`, text)
+            }
             sx={{
+              backgroundColor:
+                active === path ? theme.palette.primary.light : "transparent",
               color:
                 active === path
                   ? theme.palette.primary.contrastText
                   : theme.palette.text.primary,
+              "&:hover": {
+                backgroundColor: theme.palette.primary.light,
+                color: theme.palette.primary.contrastText,
+              },
+              justifyContent: isMinimized ? "center" : "flex-start",
+              px: isMinimized ? 2 : 3,
+              py: 1.5,
             }}
           >
-            {icon}
-          </ListItemIcon>
-          {!isMinimized && <ListItemText primary={text} />}
-          {active === path && !isMinimized && <ChevronRightOutlined />}
-        </ListItemButton>
+            <ListItemIcon
+              sx={{
+                color:
+                  active === path
+                    ? theme.palette.primary.contrastText
+                    : theme.palette.text.primary,
+                minWidth: isMinimized ? 0 : 40,
+                justifyContent: isMinimized ? "center" : "flex-start",
+              }}
+            >
+              {icon}
+            </ListItemIcon>
+            {!isMinimized && <ListItemText primary={text} />}
+          </ListItemButton>
+        </Tooltip>
       </ListItem>
     );
   };
@@ -186,66 +187,65 @@ const Sidebar = ({
           variant="persistent"
           anchor="left"
           sx={{
-            width: isMinimized ? "70px" : drawerWidth,
+            width: isMinimized ? "64px" : drawerWidth,
             "& .MuiDrawer-paper": {
               color: theme.palette.text.primary,
               backgroundColor: theme.palette.background.default,
               boxSizing: "border-box",
               borderWidth: isNonMobile ? 0 : "2px",
               width: isMinimized ? "64px" : drawerWidth,
-              transition: "width 0.3s",
-              overflow: "hidden", // Prevent scrolling the whole drawer
+              transition: "width 0.3s ease",
+              display: "flex",
+              flexDirection: "column",
             },
           }}
         >
-          <Box width="100%" height="100%" display="flex" flexDirection="column">
-            <Box p={isMinimized ? 1.5 : 4}>
-              <FlexBetween color={theme.palette.primary.main}>
+          {/* Header Section */}
+          <Box p={2}>
+            <FlexBetween>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                gap="0.5rem"
+                sx={{ userSelect: "none" }}
+              >
                 <Box
-                  display="flex"
-                  alignItems="center"
-                  gap="0.5rem"
-                  sx={{ userSelect: "none" }}
-                >
-                  <Box
-                    component="img"
-                    alt="profile"
-                    src={Logo}
-                    height={isMinimized ? "35px" : "50px"}
-                    width={isMinimized ? "35px" : "50px"}
-                    borderRadius="50%"
-                    sx={{ objectFit: "cover" }}
-                  />
-                  {!isMinimized && (
-                    <Typography variant="h6" color={theme.palette.text.primary}>
-                      Hotel Management
-                    </Typography>
-                  )}
-                </Box>
-
-                {!isNonMobile && (
-                  <IconButton onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                    <ChevronLeft />
-                  </IconButton>
+                  component="img"
+                  alt="Hotel Logo"
+                  src={Logo}
+                  height={isMinimized ? "30px" : "40px"}
+                  width={isMinimized ? "30px" : "40px"}
+                  borderRadius="50%"
+                  sx={{ objectFit: "cover" }}
+                />
+                {!isMinimized && (
+                  <Typography variant="h6" color={theme.palette.text.primary}>
+                    Hotel Management
+                  </Typography>
                 )}
-              </FlexBetween>
-            </Box>
+              </Box>
+              {!isNonMobile && !isMinimized && (
+                <IconButton onClick={() => setIsSidebarOpen(false)}>
+                  <ChevronLeft />
+                </IconButton>
+              )}
+            </FlexBetween>
+          </Box>
 
-            {/* Scrollable content */}
-            <Box
-              sx={{
-                flexGrow: 1,
-                overflowY: "auto",
-                maxHeight: "calc(90vh - 160px)",
-              }}
-            >
-              <List>
-                {(userRole === "admin" ? adminNavItems : staffNavItems).map(
-                  renderNavItem
-                )}
-                {userRole === "admin" && (
-                  <>
-                    <ListItem disablePadding>
+          {/* Navigation Items */}
+          <Box sx={{ flexGrow: 1, overflowY: "auto" }}>
+            <List>
+              {(userRole === "admin" ? adminNavItems : staffNavItems).map(
+                renderNavItem
+              )}
+              {userRole === "admin" && (
+                <>
+                  <ListItem disablePadding>
+                    <Tooltip
+                      title={isMinimized ? "Management" : ""}
+                      placement="right"
+                    >
                       <ListItemButton
                         onClick={() => setOpenManagement(!openManagement)}
                         sx={{
@@ -259,7 +259,9 @@ const Sidebar = ({
                             backgroundColor: theme.palette.primary.light,
                             color: theme.palette.primary.contrastText,
                           },
-                          px: isMinimized ? 2 : 4,
+                          justifyContent: isMinimized ? "center" : "flex-start",
+                          px: isMinimized ? 2 : 3,
+                          py: 1.5,
                         }}
                       >
                         <ListItemIcon
@@ -267,6 +269,10 @@ const Sidebar = ({
                             color: openManagement
                               ? theme.palette.primary.contrastText
                               : theme.palette.text.primary,
+                            minWidth: isMinimized ? 0 : 40,
+                            justifyContent: isMinimized
+                              ? "center"
+                              : "flex-start",
                           }}
                         >
                           {isMinimized ? (
@@ -280,87 +286,81 @@ const Sidebar = ({
                           )}
                         </ListItemIcon>
                         {!isMinimized && <ListItemText primary="Management" />}
-                        {isMinimized ? null : openManagement ? (
-                          <ExpandLess />
-                        ) : (
-                          <ExpandMore />
-                        )}
                       </ListItemButton>
-                    </ListItem>
-                    <Collapse in={openManagement} timeout="auto" unmountOnExit>
-                      <List sx={{ ml: 4 }} component="div" disablePadding>
-                        {managementItems.map(renderNavItem)}
-                      </List>
-                    </Collapse>
-                  </>
-                )}
-              </List>
-            </Box>
-
-            {/* Profile Section */}
-            {user && (
-              <Box
-                position="absolute"
-                bottom="1rem"
-                textAlign="center"
-                width="75%"
-                px={isMinimized ? "0.5rem" : "2rem"}
-                onClick={() => setOpenProfileModal(true)}
-              >
-                <Divider />
-                <Box mt="5px" display="flex" alignItems="center" gap="0.5rem">
-                  <Box sx={{ mr: isMinimized ? 0 : 4 }}>
-                    <Avatar
-                      src={`${config.API_URL}/profile_pictures/${profile.image_url}`}
-                    >
-                      {user.username.charAt(0).toUpperCase()}
-                    </Avatar>
-                  </Box>
-
-                  {/* Profile Information */}
-                  {!isMinimized && (
-                    <Box>
-                      <Typography variant="body1">
-                        {profile.first_name} {profile.last_name}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        {user.role}
-                      </Typography>
-                    </Box>
-                  )}
-
-                  {/* Log Out Icon on the Right */}
-                  <Box ml="auto">
-                    {/* Aligns the logout icon to the right */}
-                    <Tooltip title="Log Out" arrow>
-                      <IconButton
-                        onClick={handleLogout}
-                        aria-label="Log out"
-                        sx={{
-                          color: "text.secondary",
-                          "&:hover": {
-                            color: "red",
-                          },
-                        }}
-                      >
-                        <ExitToAppIcon />
-                      </IconButton>
                     </Tooltip>
-                  </Box>
-                </Box>
-              </Box>
-            )}
+                  </ListItem>
+                  <Collapse in={openManagement} timeout="auto" unmountOnExit>
+                    <List sx={{ ml: isMinimized ? 0 : 4 }} disablePadding>
+                      {managementItems.map(renderNavItem)}
+                    </List>
+                  </Collapse>
+                </>
+              )}
+            </List>
           </Box>
+
+          {/* Profile Section */}
+          {user && (
+            <Box
+              sx={{
+                mt: "auto",
+                p: isMinimized ? 1 : 2,
+                borderTop: `1px solid ${theme.palette.divider}`,
+              }}
+            >
+              <Box
+                display="flex"
+                flexDirection={isMinimized ? "column" : "row"}
+                alignItems="center"
+                gap={isMinimized ? 1 : 2}
+                onClick={() => setOpenProfileModal(true)}
+                sx={{ cursor: "pointer" }}
+              >
+                <Avatar
+                  src={`${config.API_URL}/profile_pictures/${profile.image_url}`}
+                  sx={{ width: isMinimized ? 30 : 40, height: isMinimized ? 30 : 40 }}
+                >
+                  {user.username.charAt(0).toUpperCase()}
+                </Avatar>
+                {!isMinimized && (
+                  <Box flexGrow={1}>
+                    <Typography variant="body2">
+                      {profile.first_name} {profile.last_name}
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary">
+                      {user.role}
+                    </Typography>
+                  </Box>
+                )}
+                <Tooltip title="Log Out" placement="right">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLogout();
+                    }}
+                    aria-label="Log out"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      "&:hover": { color: theme.palette.error.main },
+                      ml: isMinimized ? 0 : "auto",
+                    }}
+                  >
+                    <ExitToAppIcon fontSize={isMinimized ? "small" : "medium"} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
+          )}
+          {openProfileModal && (
+            <UserProfileModal
+              userId={userId}
+              open={openProfileModal}
+              onClose={() => setOpenProfileModal(false)}
+              fetchUser={fetchUser}
+              fetchProfile={fetchProfile}
+            />
+          )}
         </Drawer>
-      )}
-      {openProfileModal && (
-        <UserProfileModal
-          userId={userId}
-          open={openProfileModal}
-          onClose={() => setOpenProfileModal(false)}
-          fetchUser={fetchUser}
-          fetchProfile={fetchProfile}
-        />
       )}
     </Box>
   );
