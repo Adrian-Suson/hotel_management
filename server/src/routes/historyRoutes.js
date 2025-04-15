@@ -32,11 +32,11 @@ router.post("/stay_records/:stayRecordId/payment", async (req, res) => {
   const { stayRecordId } = req.params;
   const {
     amount,
-    payment_method = null,
-    total_service_charges = null,
-    discount_percentage = null,
-    discount_name = null,
-    deposit_amount = null,
+    payment_method = null, // Allow null
+    total_service_charges = null, // Allow null
+    discount_percentage = null, // Allow null
+    discount_name = null, // Allow null
+    deposit_amount = null, // Allow null
   } = req.body;
 
   let connection;
@@ -45,10 +45,12 @@ router.post("/stay_records/:stayRecordId/payment", async (req, res) => {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
+    // Check if the stayRecordId and amount are provided
     if (!stayRecordId || amount === undefined || amount === null) {
       throw new Error("Missing required fields: stayRecordId or amount.");
     }
 
+    // Fetch stay record data
     const [stayRecordData] = await connection.query(
       "SELECT * FROM stay_records WHERE id = ?",
       [stayRecordId]
@@ -60,8 +62,9 @@ router.post("/stay_records/:stayRecordId/payment", async (req, res) => {
 
     const stayRecord = stayRecordData[0];
 
+    // Insert into stay_records_history
     await connection.query(
-      "INSERT INTO transaction_history (room_id, guest_id, check_in, check_out, adults, kids, amount_paid, total_service_charges, discount_percentage, discount_name, payment_method, payment_date, deposit_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)",
+      "INSERT INTO stay_records_history (room_id, guest_id, check_in, check_out, adults, kids, amount_paid, total_service_charges, discount_percentage, discount_name, payment_method, payment_date, deposit_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)",
       [
         stayRecord.room_id,
         stayRecord.guest_id,
@@ -78,10 +81,12 @@ router.post("/stay_records/:stayRecordId/payment", async (req, res) => {
       ]
     );
 
+    // Delete related services
     await connection.query("DELETE FROM services WHERE stay_record_id = ?", [
       stayRecordId,
     ]);
 
+    // Delete the stay record from stay_records
     await connection.query("DELETE FROM stay_records WHERE id = ?", [
       stayRecordId,
     ]);
@@ -111,11 +116,12 @@ router.post("/stay_records/:stayRecordId/payment", async (req, res) => {
   }
 });
 
-router.get("/transaction_history", async (req, res) => {
+// Route to fetch stay records history data
+router.get("/stay_records_history", async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT
-        transaction_history.id,
+        stay_records_history.id,
         guests.id AS guest_id,
         CONCAT(guests.first_name, ' ', guests.last_name) AS guestName,
         guests.email AS guestEmail,
@@ -128,42 +134,43 @@ router.get("/transaction_history", async (req, res) => {
         sc.label AS status,
         sc.color AS bgcolor,
         sc.text_color,
-        transaction_history.check_in,
-        transaction_history.check_out,
-        transaction_history.adults,
-        transaction_history.kids,
-        transaction_history.amount_paid,
-        transaction_history.total_service_charges,
-        transaction_history.discount_percentage,
-        transaction_history.discount_name,
-        transaction_history.payment_method,
-        transaction_history.payment_date,
-        transaction_history.deposit_amount AS deposit,
-        transaction_history.adults + transaction_history.kids AS guestNumber
-      FROM transaction_history
-      JOIN guests ON transaction_history.guest_id = guests.id
-      JOIN rooms ON transaction_history.room_id = rooms.id
+        stay_records_history.check_in,
+        stay_records_history.check_out,
+        stay_records_history.adults,
+        stay_records_history.kids,
+        stay_records_history.amount_paid,
+        stay_records_history.total_service_charges,
+        stay_records_history.discount_percentage,
+        stay_records_history.discount_name,
+        stay_records_history.payment_method,
+        stay_records_history.payment_date,
+        stay_records_history.deposit_amount AS deposit,
+        stay_records_history.adults + stay_records_history.kids AS guestNumber
+      FROM stay_records_history
+      JOIN guests ON stay_records_history.guest_id = guests.id
+      JOIN rooms ON stay_records_history.room_id = rooms.id
       JOIN room_types ON rooms.room_type_id = room_types.id
       JOIN status_codes sc ON rooms.status_code_id = sc.id
     `);
 
-    res.json({ success: true, transaction_history: rows });
+    res.json({ success: true, stay_records_history: rows });
   } catch (error) {
-    console.error("Error fetching transaction history:", error);
+    console.error("Error fetching stay records history:", error);
     res.status(500).json({
       success: false,
-      message: "Server error occurred while fetching transaction history.",
+      message: "Server error occurred while fetching stay records history.",
     });
   }
 });
 
-router.get("/transaction_history/:id", async (req, res) => {
+// Route to fetch a specific stay record history by ID
+router.get("/stay_records_history/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const [rows] = await db.query(
       `
       SELECT
-        transaction_history.id,
+        stay_records_history.id,
         guests.id AS guest_id,
         CONCAT(guests.first_name, ' ', guests.last_name) AS guestName,
         guests.email AS guestEmail,
@@ -176,29 +183,29 @@ router.get("/transaction_history/:id", async (req, res) => {
         sc.label AS status,
         sc.color AS bgcolor,
         sc.text_color,
-        transaction_history.check_in,
-        transaction_history.check_out,
-        transaction_history.adults,
-        transaction_history.kids,
-        transaction_history.amount_paid,
-        transaction_history.total_service_charges,
-        transaction_history.discount_percentage,
-        transaction_history.discount_name,
-        transaction_history.payment_method,
-        transaction_history.payment_date, 
-        transaction_history.adults + transaction_history.kids AS guestNumber
-      FROM transaction_history
-      JOIN guests ON transaction_history.guest_id = guests.id
-      JOIN rooms ON transaction_history.room_id = rooms.id
+        stay_records_history.check_in,
+        stay_records_history.check_out,
+        stay_records_history.adults,
+        stay_records_history.kids,
+        stay_records_history.amount_paid,
+        stay_records_history.total_service_charges,
+        stay_records_history.discount_percentage,
+        stay_records_history.discount_name,
+        stay_records_history.payment_method,
+        stay_records_history.payment_date, 
+        stay_records_history.adults + stay_records_history.kids AS guestNumber
+      FROM stay_records_history
+      JOIN guests ON stay_records_history.guest_id = guests.id
+      JOIN rooms ON stay_records_history.room_id = rooms.id
       JOIN room_types ON rooms.room_type_id = room_types.id
       JOIN status_codes sc ON rooms.status_code_id = sc.id
-      WHERE transaction_history.id = ?
+      WHERE stay_records_history.id = ?
     `,
       [id]
     );
 
     if (rows.length) {
-      res.json({ success: true, transaction: rows[0] });
+      res.json({ success: true, stay_record: rows[0] });
     } else {
       res.status(404).json({
         success: false,
@@ -206,21 +213,22 @@ router.get("/transaction_history/:id", async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error fetching transaction by ID:", error);
+    console.error("Error fetching stay record by ID:", error);
     res.status(500).json({
       success: false,
-      message: "Server error occurred while fetching the transaction.",
+      message: "Server error occurred while fetching the stay record.",
     });
   }
 });
 
+// Route to fetch stay records history data for a specific guest
 router.get("/stay_records/guest/:guestId/history", async (req, res) => {
   const { guestId } = req.params;
   try {
     const [rows] = await db.query(
       `
       SELECT
-        transaction_history.id,
+        stay_records_history.id,
         guests.id AS guest_id,
         CONCAT(guests.first_name, ' ', guests.last_name) AS guestName,
         guests.email AS guestEmail,
@@ -233,33 +241,33 @@ router.get("/stay_records/guest/:guestId/history", async (req, res) => {
         sc.label AS status,
         sc.color AS bgcolor,
         sc.text_color,
-        transaction_history.check_in,
-        transaction_history.check_out,
-        transaction_history.adults,
-        transaction_history.kids,
-        transaction_history.amount_paid,
-        transaction_history.total_service_charges,
-        transaction_history.discount_percentage,
-        transaction_history.discount_name,
-        transaction_history.payment_method,
-        transaction_history.payment_date,
-        transaction_history.adults + transaction_history.kids AS guestNumber
-      FROM transaction_history
-      JOIN guests ON transaction_history.guest_id = guests.id
-      JOIN rooms ON transaction_history.room_id = rooms.id
+        stay_records_history.check_in,
+        stay_records_history.check_out,
+        stay_records_history.adults,
+        stay_records_history.kids,
+        stay_records_history.amount_paid,
+        stay_records_history.total_service_charges,
+        stay_records_history.discount_percentage,
+        stay_records_history.discount_name,
+        stay_records_history.payment_method,
+        stay_records_history.payment_date,
+        stay_records_history.adults + stay_records_history.kids AS guestNumber
+      FROM stay_records_history
+      JOIN guests ON stay_records_history.guest_id = guests.id
+      JOIN rooms ON stay_records_history.room_id = rooms.id
       JOIN room_types ON rooms.room_type_id = room_types.id
       JOIN status_codes sc ON rooms.status_code_id = sc.id
-      WHERE transaction_history.guest_id = ?
+      WHERE stay_records_history.guest_id = ?
       `,
       [guestId]
     );
 
     res.json({ success: true, history_records: rows });
   } catch (error) {
-    console.error("Error fetching transaction history:", error);
+    console.error("Error fetching stay records history:", error);
     res.status(500).json({
       success: false,
-      message: "Server error occurred while fetching transaction history.",
+      message: "Server error occurred while fetching stay records history.",
     });
   }
 });
@@ -269,9 +277,9 @@ router.get("/room_usage", async (req, res) => {
     const [rows] = await db.query(`
       SELECT
         rooms.room_number,
-        COUNT(transaction_history.id) AS usage_count
+        COUNT(stay_records_history.id) AS usage_count
       FROM rooms
-      LEFT JOIN transaction_history ON rooms.id = transaction_history.room_id
+      LEFT JOIN stay_records_history ON rooms.id = stay_records_history.room_id
       GROUP BY rooms.room_number
       ORDER BY usage_count DESC
     `);

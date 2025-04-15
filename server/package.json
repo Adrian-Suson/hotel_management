@@ -4,8 +4,9 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "concurrently \"npm run start-server\" \"npm run start-react\" ",
+    "start": "concurrently \"npm run start-server\" \"npm run start-react\" \"npm run open-react\"",
     "start-react": "cd ../frontend && npm start",
+    "open-react": "cd ../frontend && npm run open-url",
     "start-server": "nodemon src/index.js"
   },
   "author": "",
